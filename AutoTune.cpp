@@ -38,6 +38,9 @@
 
 namespace faiss {
 
+#ifdef _MSC_VER
+#define strtok_r  strtok_s
+#endif //_MSC_VER
 
 AutoTuneCriterion::AutoTuneCriterion (idx_t nq, idx_t nnn):
     nq (nq), nnn (nnn), gt_nnn (0)
@@ -437,7 +440,8 @@ void ParameterSpace::set_index_parameters (Index *index, size_t cno) const
 void ParameterSpace::set_index_parameters (
      Index *index, const char *description_in) const
 {
-    char description[strlen(description_in) + 1];
+    std::vector<char> vdescription(strlen(description_in) + 1);
+	char* description = vdescription.data();
     char *ptr;
     memcpy (description, description_in, strlen(description_in) + 1);
 

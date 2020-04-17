@@ -22,7 +22,9 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <stdint.h>
 
 #ifdef __SSE__
@@ -39,6 +41,10 @@
 
 
 extern "C" {
+
+#ifdef _MSC_VER
+#define FINTEGER int
+#endif //_MSC_VER
 
 /* declare BLAS functions, see http://www.netlib.org/clapack/cblas/ */
 
@@ -488,7 +494,8 @@ void IndexHNSW::init_level_0_from_knngraph(
 #pragma omp parallel for
     for (idx_t i = 0; i < ntotal; i++) {
         DistanceComputer *qdis = storage_distance_computer(storage);
-        float vec[d];
+        std::vector<float> vvec(d);
+		float* vec = vvec.data();
         storage->reconstruct(i, vec);
         qdis->set_query(vec);
 
@@ -533,7 +540,8 @@ void IndexHNSW::init_level_0_from_entry_points(
 
         DistanceComputer *dis = storage_distance_computer(storage);
         ScopeDeleter1<DistanceComputer> del(dis);
-        float vec[storage->d];
+        std::vector<float> vvec(storage->d);
+		float* vec = vvec.data();
 
 #pragma omp  for schedule(dynamic)
         for (int i = 0; i < n; i++) {
@@ -721,7 +729,7 @@ void ReconstructFromNeighbors::reconstruct(storage_idx_t i, float *x, float *tmp
                 x[l] += w * tmp[l];
         }
     } else {
-        const float *betas[nsq];
+        const float *betas[1024];
         {
             const float *b = codebook.data();
             const uint8_t *c = &codes[i * code_size];

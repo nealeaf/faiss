@@ -10,11 +10,14 @@
 #include <faiss/OnDiskInvertedLists.h>
 
 #include <pthread.h>
+#include <algorithm>
 
 #include <unordered_set>
 
+#ifndef _MSC_VER
 #include <sys/mman.h>
 #include <unistd.h>
+#endif //_MSC_VER
 #include <sys/types.h>
 
 #include <faiss/impl/FaissAssert.h>
@@ -272,32 +275,33 @@ void OnDiskInvertedLists::prefetch_lists (const idx_t *list_nos, int n) const
 void OnDiskInvertedLists::do_mmap ()
 {
     const char *rw_flags = read_only ? "r" : "r+";
-    int prot = read_only ? PROT_READ : PROT_WRITE | PROT_READ;
-    FILE *f = fopen (filename.c_str(), rw_flags);
-    FAISS_THROW_IF_NOT_FMT (f, "could not open %s in mode %s: %s",
-                            filename.c_str(), rw_flags, strerror(errno));
+	//todo mmap 
+    //int prot = read_only ? PROT_READ : PROT_WRITE | PROT_READ;
+    //FILE *f = fopen (filename.c_str(), rw_flags);
+    //FAISS_THROW_IF_NOT_FMT (f, "could not open %s in mode %s: %s",
+    //                        filename.c_str(), rw_flags, strerror(errno));
 
-    uint8_t * ptro = (uint8_t*)mmap (nullptr, totsize,
-                          prot, MAP_SHARED, fileno (f), 0);
+    //uint8_t * ptro = (uint8_t*)mmap (nullptr, totsize,
+    //                      prot, MAP_SHARED, fileno (f), 0);
 
-    FAISS_THROW_IF_NOT_FMT (ptro != MAP_FAILED,
-                            "could not mmap %s: %s",
-                            filename.c_str(),
-                            strerror(errno));
-    ptr = ptro;
-    fclose (f);
+    //FAISS_THROW_IF_NOT_FMT (ptro != MAP_FAILED,
+    //                        "could not mmap %s: %s",
+    //                        filename.c_str(),
+    //                        strerror(errno));
+    //ptr = ptro;
+    //fclose (f);
 
 }
 
 void OnDiskInvertedLists::update_totsize (size_t new_size)
 {
-
-    // unmap file
-    if (ptr != nullptr) {
-        int err = munmap (ptr, totsize);
-        FAISS_THROW_IF_NOT_FMT (err == 0, "munmap error: %s",
-                                strerror(errno));
-    }
+	//@todo
+    //// unmap file
+    //if (ptr != nullptr) {
+    //    int err = munmap (ptr, totsize);
+    //    FAISS_THROW_IF_NOT_FMT (err == 0, "munmap error: %s",
+    //                            strerror(errno));
+    //}
     if (totsize == 0) {
         // must create file before truncating it
         FILE *f = fopen (filename.c_str(), "w");
@@ -321,12 +325,14 @@ void OnDiskInvertedLists::update_totsize (size_t new_size)
 
     // create file
     printf ("resizing %s to %ld bytes\n", filename.c_str(), totsize);
+	//@todo 
+ //   int err = truncate (filename.c_str(), totsize);
+	//SetFilePointer()
+	//SetEndOfFile
 
-    int err = truncate (filename.c_str(), totsize);
-
-    FAISS_THROW_IF_NOT_FMT (err == 0, "truncate %s to %ld: %s",
-                            filename.c_str(), totsize,
-                            strerror(errno));
+ //   FAISS_THROW_IF_NOT_FMT (err == 0, "truncate %s to %ld: %s",
+ //                           filename.c_str(), totsize,
+ //                           strerror(errno));
     do_mmap ();
 }
 
@@ -380,15 +386,15 @@ OnDiskInvertedLists::OnDiskInvertedLists ():
 OnDiskInvertedLists::~OnDiskInvertedLists ()
 {
     delete pf;
-
-    // unmap all lists
-    if (ptr != nullptr) {
-        int err = munmap (ptr, totsize);
-        if (err != 0) {
-            fprintf(stderr, "mumap error: %s",
-                    strerror(errno));
-        }
-    }
+	//@todo mmap
+    //// unmap all lists
+    //if (ptr != nullptr) {
+    //    int err = munmap (ptr, totsize);
+    //    if (err != 0) {
+    //        fprintf(stderr, "mumap error: %s",
+    //                strerror(errno));
+    //    }
+    //}
     delete locks;
 }
 

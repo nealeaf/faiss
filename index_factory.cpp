@@ -41,6 +41,9 @@
 
 namespace faiss {
 
+#ifdef _MSC_VER
+#define strtok_r strtok_s
+#endif //_MSC_VER
 
 /***************************************************************
  * index_factory
@@ -81,7 +84,8 @@ Index *index_factory (int d, const char *description_in, MetricType metric)
 
     ScopeDeleter1<Index> del_coarse_quantizer, del_index;
 
-    char description[strlen(description_in) + 1];
+    std::vector<char> vdescription(strlen(description_in) + 1);
+	char* description = vdescription.data();
     char *ptr;
     memcpy (description, description_in, strlen(description_in) + 1);
 

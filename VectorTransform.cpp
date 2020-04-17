@@ -13,6 +13,7 @@
 #include <cmath>
 #include <cstring>
 #include <memory>
+#include <algorithm>
 
 #include <faiss/utils/distances.h>
 #include <faiss/utils/random.h>

@@ -35,6 +35,12 @@ typedef int32_t hamdis_t;
 
 namespace faiss {
 
+//todo 
+#ifdef _MSC_VER
+#define __builtin_popcountl (int)__popcnt64;
+#define __builtin_ctzll 
+#endif //_MSC_VER
+
 /**************************************************
  * General bit vector functions
  **************************************************/

@@ -24,6 +24,10 @@
 
 namespace faiss {
 
+#ifdef _MSC_VER
+#define finite _finite
+#endif
+
 ClusteringParameters::ClusteringParameters ():
     niter(25),
     nredo(1),

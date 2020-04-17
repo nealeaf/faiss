@@ -172,7 +172,8 @@ void Index2Layer::search(
 
 void Index2Layer::reconstruct_n(idx_t i0, idx_t ni, float* recons) const
 {
-    float recons1[d];
+    std::vector<float> vrecons1(d);
+	float* recons1 = vrecons1.data();
     FAISS_THROW_IF_NOT (i0 >= 0 && i0 + ni <= ntotal);
     const uint8_t *rp = &codes[i0 * code_size];
 
